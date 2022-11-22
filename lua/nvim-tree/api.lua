@@ -6,45 +6,23 @@ local Api = {
   fs = { copy = {} },
   git = {},
   live_filter = {},
-  config = { mappings = {} },
 }
 
 local function inject_node(f)
-  return function(node, ...)
+  return function(node)
     node = node or require("nvim-tree.lib").get_node_at_cursor()
-    f(node, ...)
+    f(node)
   end
 end
 
----@class ApiTreeOpenOpts
----@field path string|nil path
----@field current_window boolean|nil default false
----@field find_file boolean|nil default false
----@field update_root boolean|nil default false
-
 Api.tree.open = require("nvim-tree").open
-
----@class ApiTreeToggleOpts
----@field path string|nil
----@field current_window boolean|nil default false
----@field find_file boolean|nil default false
----@field update_root boolean|nil default false
----@field focus boolean|nil default true
-
 Api.tree.toggle = require("nvim-tree").toggle
-
 Api.tree.close = require("nvim-tree.view").close
-
 Api.tree.close_in_this_tab = require("nvim-tree.view").close_this_tab_only
-
 Api.tree.close_in_all_tabs = require("nvim-tree.view").close_all_tabs
-
 Api.tree.focus = require("nvim-tree").focus
-
 Api.tree.reload = require("nvim-tree.actions.reloaders.reloaders").reload_explorer
-
 Api.tree.change_root = require("nvim-tree").change_dir
-
 Api.tree.change_root_to_node = inject_node(function(node)
   if node.name == ".." then
     require("nvim-tree.actions.root.change-dir").fn ".."
@@ -52,40 +30,24 @@ Api.tree.change_root_to_node = inject_node(function(node)
     require("nvim-tree.actions.root.change-dir").fn(require("nvim-tree.lib").get_last_group_node(node).absolute_path)
   end
 end)
-
 Api.tree.change_root_to_parent = inject_node(require("nvim-tree.actions.root.dir-up").fn)
-
 Api.tree.get_node_under_cursor = require("nvim-tree.lib").get_node_at_cursor
-
 Api.tree.get_nodes = require("nvim-tree.lib").get_nodes
-
 Api.tree.find_file = require("nvim-tree.actions.finders.find-file").fn
-
 Api.tree.search_node = require("nvim-tree.actions.finders.search-node").fn
-
 Api.tree.collapse_all = require("nvim-tree.actions.tree-modifiers.collapse-all").fn
-
+Api.tree.collapse_directory = inject_node(require("nvim-tree.actions.tree-modifiers.collapse-directory").fn)
 Api.tree.expand_all = inject_node(require("nvim-tree.actions.tree-modifiers.expand-all").fn)
-
 Api.tree.toggle_gitignore_filter = require("nvim-tree.actions.tree-modifiers.toggles").git_ignored
-
-Api.tree.toggle_git_clean_filter = require("nvim-tree.actions.tree-modifiers.toggles").git_clean
-
-Api.tree.toggle_no_buffer_filter = require("nvim-tree.actions.tree-modifiers.toggles").no_buffer
-
 Api.tree.toggle_custom_filter = require("nvim-tree.actions.tree-modifiers.toggles").custom
-
 Api.tree.toggle_hidden_filter = require("nvim-tree.actions.tree-modifiers.toggles").dotfiles
-
 Api.tree.toggle_help = require("nvim-tree.actions.tree-modifiers.toggles").help
 
 Api.fs.create = inject_node(require("nvim-tree.actions.fs.create-file").fn)
 Api.fs.remove = inject_node(require("nvim-tree.actions.fs.remove-file").fn)
 Api.fs.trash = inject_node(require("nvim-tree.actions.fs.trash").fn)
-Api.fs.rename_node = inject_node(require("nvim-tree.actions.fs.rename-file").fn ":t")
-Api.fs.rename = inject_node(require("nvim-tree.actions.fs.rename-file").fn ":t")
-Api.fs.rename_sub = inject_node(require("nvim-tree.actions.fs.rename-file").fn ":p")
-Api.fs.rename_basename = inject_node(require("nvim-tree.actions.fs.rename-file").fn ":t:r")
+Api.fs.rename = inject_node(require("nvim-tree.actions.fs.rename-file").fn(false))
+Api.fs.rename_sub = inject_node(require("nvim-tree.actions.fs.rename-file").fn(true))
 Api.fs.cut = inject_node(require("nvim-tree.actions.fs.copy-paste").cut)
 Api.fs.paste = inject_node(require("nvim-tree.actions.fs.copy-paste").paste)
 Api.fs.clear_clipboard = require("nvim-tree.actions.fs.copy-paste").clear_clipboard
@@ -161,8 +123,5 @@ Api.marks.bulk.move = require("nvim-tree.marks.bulk-move").bulk_move
 Api.marks.navigate.next = require("nvim-tree.marks.navigation").next
 Api.marks.navigate.prev = require("nvim-tree.marks.navigation").prev
 Api.marks.navigate.select = require("nvim-tree.marks.navigation").select
-
-Api.config.mappings.active = require("nvim-tree.actions").active_mappings_clone
-Api.config.mappings.default = require("nvim-tree.actions").default_mappings_clone
 
 return Api
