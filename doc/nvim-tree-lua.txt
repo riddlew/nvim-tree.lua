@@ -1166,6 +1166,7 @@ exists.
     - find_file `(filename: string)`
     - search_node
     - collapse_all `(keep_buffers?: bool)`
+    - collapse_directory
     - expand_all
     - toggle_gitignore_filter
     - toggle_custom_filter
