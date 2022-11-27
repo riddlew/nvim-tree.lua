@@ -225,29 +225,30 @@ local function copy_to_clipboard(content)
   if M.use_system_clipboard == true then
     vim.fn.setreg("+", content)
     vim.fn.setreg('"', content)
-    return notify.info(string.format("Copied %s to system clipboard!", content))
   else
     vim.fn.setreg('"', content)
     vim.fn.setreg("1", content)
-    return notify.info(string.format("Copied %s to neovim clipboard!", content))
   end
 end
 
 function M.copy_filename(node)
-  return copy_to_clipboard(node.name)
+  copy_to_clipboard(node.name)
+  return notify.info(string.format("Copied %s to neovim clipboard!", node.name))
 end
 
 function M.copy_path(node)
   local absolute_path = node.absolute_path
   local relative_path = utils.path_relative(absolute_path, core.get_cwd())
   local content = node.nodes ~= nil and utils.path_add_trailing(relative_path) or relative_path
-  return copy_to_clipboard(content)
+  copy_to_clipboard(content)
+  return notify.info(string.format("Copied %s to neovim clipboard!", content))
 end
 
 function M.copy_absolute_path(node)
   local absolute_path = node.absolute_path
   local content = node.nodes ~= nil and utils.path_add_trailing(absolute_path) or absolute_path
-  return copy_to_clipboard(content)
+  copy_to_clipboard(content)
+  return notify.info(string.format("Copied %s to neovim clipboard!", content))
 end
 
 function M.setup(opts)
