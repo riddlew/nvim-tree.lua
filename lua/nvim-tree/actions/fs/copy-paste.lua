@@ -146,7 +146,7 @@ end
 function M.clear_clipboard()
   clipboard.move = {}
   clipboard.copy = {}
-  utils.notify.info "Clipboard has been emptied."
+  notify.info "Clipboard has been emptied."
 end
 
 local function marked_action(action, clipboard)
