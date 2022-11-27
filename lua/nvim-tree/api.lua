@@ -2,7 +2,7 @@ local Api = {
   tree = {},
   node = { navigate = { sibling = {}, git = {}, diagnostics = {} }, run = {}, open = {} },
   events = {},
-  marks = { bulk = {}, navigate = {} },
+  marks = { bulk = {}, navigate = {}, copy = {} },
   fs = { copy = {} },
   git = {},
   live_filter = {},
@@ -122,5 +122,8 @@ Api.marks.bulk.move = require("nvim-tree.marks.bulk-move").bulk_move
 Api.marks.navigate.next = require("nvim-tree.marks.navigation").next
 Api.marks.navigate.prev = require("nvim-tree.marks.navigation").prev
 Api.marks.navigate.select = require("nvim-tree.marks.navigation").select
+Api.marks.copy.absolute_path = require("nvim-tree.marks.copy-paste").copy_marked_absolute_path
+Api.marks.copy.filename = require("nvim-tree.marks.copy-paste").copy_marked_filename
+Api.marks.copy.relative_path = require("nvim-tree.marks.copy-paste").copy_marked_relative_path
 
 return Api
