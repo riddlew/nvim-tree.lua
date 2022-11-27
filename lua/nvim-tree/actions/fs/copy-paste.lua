@@ -4,6 +4,7 @@ local utils = require "nvim-tree.utils"
 local core = require "nvim-tree.core"
 local events = require "nvim-tree.events"
 local notify = require "nvim-tree.notify"
+local marks = require "nvim-tree.marks"
 
 local M = {}
 
@@ -114,19 +115,32 @@ local function do_single_paste(source, dest, action_type, action_fn)
   end
 end
 
+local function clipboard_has_node(node, clip)
+  for _, _node in ipairs(clip) do
+    if _node.absolute_path == node.absolute_path then
+      return true
+    end
+  end
+
+  return false
+end
+
 local function add_to_clipboard(node, clip)
   if node.name == ".." then
     return
   end
 
+  if not clipboard_has_node(node, clip) then
+    table.insert(clip, node)
+  end
+end
+
+local function remove_from_clipboard(node, clip)
   for idx, _node in ipairs(clip) do
     if _node.absolute_path == node.absolute_path then
       table.remove(clip, idx)
-      return notify.info(node.absolute_path .. " removed to clipboard.")
     end
   end
-  table.insert(clip, node)
-  notify.info(node.absolute_path .. " added to clipboard.")
 end
 
 function M.clear_clipboard()
@@ -135,12 +149,55 @@ function M.clear_clipboard()
   notify.info "Clipboard has been emptied."
 end
 
+local function marked_action(action, clipboard)
+  local marked = marks.get_marks()
+
+  if #marked == 0 then
+    return notify.error("cannot " .. (action == "copy" and "copy" or "cut") .. "marks, no files are marked.")
+  end
+
+  local should_add = false
+  if marks.get_mark(marked[1]) and not clipboard_has_node(marks.get_mark(marked[1]), clipboard) then
+    should_add = true
+  end
+
+  for _, node in pairs(marked) do
+    if should_add then
+      add_to_clipboard(node, clipboard)
+    else
+      remove_from_clipboard(node, clipboard)
+    end
+  end
+
+  M.print_clipboard()
+end
+
 function M.copy(node)
-  add_to_clipboard(node, clipboard.copy)
+  if clipboard_has_node(node, clipboard.copy) then
+    remove_from_clipboard(node, clipboard.copy)
+    notify.info(node.absolute_path .. " removed from clipboard.")
+  else
+    add_to_clipboard(node, clipboard.copy)
+    notify.info(node.absolute_path .. " added from clipboard.")
+  end
+end
+
+function M.copy_marked()
+  marked_action("copy", clipboard.copy)
 end
 
 function M.cut(node)
-  add_to_clipboard(node, clipboard.move)
+  if clipboard_has_node(node, clipboard.move) then
+    remove_from_clipboard(node, clipboard.move)
+    notify.info(node.absolute_path .. " removed from clipboard.")
+  else
+    add_to_clipboard(node, clipboard.copy)
+    notify.info(node.absolute_path .. " added from clipboard.")
+  end
+end
+
+function M.cut_marked()
+  marked_action("cut", clipboard.move)
 end
 
 local function do_paste(node, action_type, action_fn)
