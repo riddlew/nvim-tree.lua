@@ -138,6 +138,7 @@ local function remove_from_clipboard(node, clip)
   for idx, _node in ipairs(clip) do
     if _node.absolute_path == node.absolute_path then
       table.remove(clip, idx)
+	  return
     end
   end
 end
@@ -273,6 +274,10 @@ function M.print_clipboard()
     for _, item in pairs(clipboard.copy) do
       table.insert(content, " * " .. item.absolute_path)
     end
+  end
+
+  if #clipboard.move == 0 and #clipboard.copy == 0 then
+    return notify.info("Clipboard is empty")
   end
 
   return notify.info(table.concat(content, "\n") .. "\n")
